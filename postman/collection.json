@@ -1,0 +1,384 @@
+{
+  "info": {
+    "name": "Khuslen — JSONPlaceholder",
+    "_postman_id": "lab14-jsonplaceholder-collection",
+    "description": "F.CSM311 Бие даалт 14 — JSONPlaceholder API тест collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Happy GET — List all posts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Бүх posts жагсаалтыг авах — 200 OK, массив байх ёстой"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: request явуулах цагийг тэмдэглэх",
+                  "pm.environment.set('requestTime', new Date().toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Array has 100 posts', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.length).to.equal(100);",
+                  "});",
+                  "",
+                  "pm.test('Post has required fields', () => {",
+                  "  const post = pm.response.json()[0];",
+                  "  pm.expect(post).to.have.property('id');",
+                  "  pm.expect(post).to.have.property('title');",
+                  "  pm.expect(post).to.have.property('body');",
+                  "  pm.expect(post).to.have.property('userId');",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is JSON', () => {",
+                  "  pm.response.to.have.header('Content-Type');",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET by id — Get single post",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "1"]
+            },
+            "description": "ID=1 post авах — 200 OK, зөв бүтэцтэй байх ёстой"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Post id is 1', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.id).to.equal(1);",
+                  "});",
+                  "",
+                  "pm.test('id is a number', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('title is a string', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.title).to.be.a('string');",
+                  "});",
+                  "",
+                  "// Chain: дараагийн request-д postId хадгалах",
+                  "const data = pm.response.json();",
+                  "pm.environment.set('postId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST — Create new post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Post {{$randomInt}}\",\n  \"body\": \"This is a test post body created by Newman\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Шинэ post үүсгэх — 201 Created, шинэ id буцаах ёстой"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: random title үүсгэх",
+                  "pm.environment.set('randomTitle', 'Test Post ' + Math.floor(Math.random() * 10000));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('New post has id', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.have.property('id');",
+                  "  pm.expect(data.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Response has title and body', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.have.property('title');",
+                  "  pm.expect(data).to.have.property('body');",
+                  "});",
+                  "",
+                  "// Chain: үүссэн post-ын id-г хадгалах",
+                  "const data = pm.response.json();",
+                  "pm.environment.set('newPostId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT — Update post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"title\": \"Updated Post Title\",\n  \"body\": \"Updated post body content\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "1"]
+            },
+            "description": "Post бүтнээр засах — 200 OK, өөрчлөлт хадгалагдсан байх ёстой"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Title is updated', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.title).to.equal('Updated Post Title');",
+                  "});",
+                  "",
+                  "pm.test('Id is preserved', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.id).to.equal(1);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE — Delete post",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/posts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "1"]
+            },
+            "description": "Post устгах — 200 OK, хоосон object буцаах"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Response is empty object', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "Error — Get non-existent post (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts/999999",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "999999"]
+            },
+            "description": "Байхгүй post авах — 404 Not Found буцаах ёстой"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 1000ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty object', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('object');",
+                  "  pm.expect(Object.keys(data).length).to.equal(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Error — Get posts by invalid userId",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts?userId=99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "99999"
+                }
+              ]
+            },
+            "description": "Байхгүй userId-р шүүх — 200 OK, хоосон массив буцаах"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Empty array for non-existent user', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('array');",
+                  "  pm.expect(data.length).to.equal(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Filter — Posts by userId",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts?userId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "userId=1-ийн posts шүүх — бүгд userId=1 байх ёстой"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('All posts belong to userId 1', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data).to.be.an('array');",
+                  "  data.forEach(post => {",
+                  "    pm.expect(post.userId).to.equal(1);",
+                  "  });",
+                  "});",
+                  "",
+                  "pm.test('Has 10 posts for userId 1', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.length).to.equal(10);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
