@@ -109,8 +109,7 @@
                   "});",
                   "",
                   "// Chain: дараагийн request-д postId хадгалах",
-                  "const data = pm.response.json();",
-                  "pm.environment.set('postId', data.id);"
+                  "pm.environment.set('postId', pm.response.json().id);"
                 ]
               }
             }
@@ -172,8 +171,7 @@
                   "});",
                   "",
                   "// Chain: үүссэн post-ын id-г хадгалах",
-                  "const data = pm.response.json();",
-                  "pm.environment.set('newPostId', data.id);"
+                  "pm.environment.set('newPostId', pm.response.json().id);"
                 ]
               }
             }
